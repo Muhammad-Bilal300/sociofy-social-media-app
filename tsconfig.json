@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES6", // JavaScript version
+    "module": "CommonJS", // Module system
+    "strict": true, // Enable strict mode
+    "esModuleInterop": true, // Allow importing ES6 modules
+    "skipLibCheck": true, // Skip library checks
+    "forceConsistentCasingInFileNames": true, // Ensure consistent file name casing
+    "outDir": "./dist", // Output directory for compiled files
+    "rootDir": "./src", // Input directory for TypeScript files
+    // "typeRoots": ["./node_modules/@types"],
+    // "types": ["node"],
+    "resolveJsonModule": true // Resolve JSON imports
+  },
+  "include": ["src/**/*"], // TypeScript files source location
+  "exclude": ["node_modules"] // Exclude node_modules folder
+}
