@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+@theme {
+  /* Color gradients */
+  --color-gradient1: oklch(59.09% 0.229 281.25);
+  --color-gradient2: oklch(73.33% 0.142 242.05);
+  --color-gradient3: oklch(93.76% 0.026 321.94);
+  --color-primary: oklch(59.09% 0.229 281.25);
+  --color-secondary: oklch(0.68 0.0049 214.34);
+
+  /* Font sizes */
+  --font-size-main-heading: 2rem; /* 48px */
+  --font-size-heading: 1.75rem; /* 36px */
+  --font-size-sub-heading: 1.5rem; /* 24px */
+  --font-size-text-1: 1rem; /* 20px */
+  --font-size-text-2: 0.75rem; /* 18px */
+  --font-size-text-3: 0.5rem; /* 16px */
+}
+
+/* Optional: Create utility classes for these font sizes */
+.main-heading {
+  font-size: var(--font-size-main-heading);
+  font-weight: 800;
+}
+
+.heading {
+  font-size: var(--font-size-heading);
+  font-weight: 650;
+}
+
+.sub-heading {
+  font-size: var(--font-size-sub-heading);
+  font-weight: 500;
+}
+
+.text-1 {
+  font-size: var(--font-size-text-1);
+}
+
+.text-2 {
+  font-size: var(--font-size-text-2);
+}
+
+.text-3 {
+  font-size: var(--font-size-text-3);
+}
