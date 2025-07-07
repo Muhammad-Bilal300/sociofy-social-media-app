@@ -2,45 +2,41 @@ name: 🚀 Deploy Sociofy Client - Production
 
 on:
   push:
-    branches:
-      - client
+    branches: [ "client" ]
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout Code
+      - name: ⬇️ Checkout code
         uses: actions/checkout@v4
 
       - name: 🧰 Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22'
+          node-version: "18"
 
-      - name: 📦 Install Dependencies
+      - name: 📦 Install dependencies
         run: npm install --force
 
-      - name: 🔨 Build Frontend (TypeScript + Vite)
+      - name: 🔨 Build Frontend (Vite + TypeScript)
         run: npm run build
 
-      - name: 📂 Verify dist Folder
+      - name: 📂 Verify dist folder (Debugging)
+        run: ls -l dist/ || echo "⚠️ dist not found!"
+
+      - name: 🚚 Deploy dist folder to EC2 using rsync + SSH private key
         run: |
-          echo "✅ Checking dist folder..."
-          ls -la dist || echo "⚠️ dist not found!"
+          echo "✅ Deploying dist folder to EC2..."
 
-      - name: 🚚 Upload dist to EC2 using SCP
-        uses: appleboy/scp-action@v0.1.4
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: ${{ secrets.EC2_SSH_PORT }}
-          source: "dist/*"
-          target: "/var/www/sociofy-client"
+          echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
 
-      - name: 🔁 Reload NGINX
+          rsync -avz -e "ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no -p ${{ secrets.EC2_SSH_PORT }}" dist/ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/usr/share/nginx/html/
+
+      - name: 🔁 Restart NGINX
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -48,5 +44,4 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }}
           script: |
-            echo "🔁 Reloading NGINX..."
             sudo nginx -t && sudo systemctl reload nginx
