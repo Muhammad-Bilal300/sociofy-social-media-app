@@ -22,15 +22,15 @@ jobs:
       - name: 📦 Install dependencies
         run: npm install --force
 
-      - name: 🔨 Build React (TypeScript + Vite)
+      - name: 🔨 Build frontend (Vite + TypeScript)
         run: npm run build
 
       - name: 📂 Verify dist output
         run: |
-          echo "📦 Contents of dist folder:"
-          ls -la dist || echo "⚠️ dist not found!"
+          echo "Dist contents:"
+          ls -la dist || echo "⚠️ dist not found"
 
-      - name: 🚚 Upload frontend build to EC2
+      - name: 🚚 Upload dist to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
