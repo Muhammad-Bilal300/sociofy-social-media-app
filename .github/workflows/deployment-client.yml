@@ -1,0 +1,48 @@
+name: 🚀 Deploy Sociofy Client - Production
+
+on:
+  push:
+    branches:
+      - client
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🧰 Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: 📦 Install dependencies
+        run: npm install --force
+
+      - name: 🔨 Build TypeScript + Vite
+        run: npm run build
+
+      - name: 📂 Verify dist output
+        run: |
+          echo "Contents of dist folder:"
+          ls -la dist || echo "⚠️ dist not found!"
+
+      - name: 🚚 Deploy dist to EC2 (React/Vite build)
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+
+          rsync -avz -e "ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no -p ${{ secrets.EC2_SSH_PORT }}" dist/ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/var/www/sociofy-client/
+
+      - name: 🔁 Reload NGINX
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_SSH_PORT }}
+          script: |
+            sudo nginx -t && sudo systemctl reload nginx
