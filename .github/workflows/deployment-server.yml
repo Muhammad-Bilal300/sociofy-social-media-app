@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,7 +17,7 @@ jobs:
       - name: 🧰 Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '22'  # Your EC2 has Node 22
+          node-version: '22'
 
       - name: 📦 Install dependencies
         run: npm install
@@ -25,20 +25,22 @@ jobs:
       - name: 🔨 Build TypeScript
         run: npm run build
 
-      - name: 🚀 Upload dist + package files to EC2
+      - name: 🔍 Check dist contents
+        run: |
+          echo "Checking dist folder:"
+          ls -la dist || echo "❌ dist does not exist or is empty"
+
+      - name: 🚚 Upload dist + config to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
-          source: |
-            dist/
-            package.json
-            package-lock.json
-          target: ~/sociofy/server
+          source: "dist/*,package.json,package-lock.json"
+          target: "~/sociofy/server"
 
-      - name: 🔁 Restart PM2 on EC2
+      - name: 🔁 Restart backend on EC2 using PM2
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
