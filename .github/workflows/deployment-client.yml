@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ⬇️ Checkout code
+      - name: ⬇️ Checkout Code
         uses: actions/checkout@v4
 
       - name: 🧰 Set up Node.js
@@ -19,18 +19,18 @@ jobs:
         with:
           node-version: '22'
 
-      - name: 📦 Install dependencies
+      - name: 📦 Install Dependencies
         run: npm install --force
 
-      - name: 🔨 Build frontend (Vite + TypeScript)
+      - name: 🔨 Build Frontend (TypeScript + Vite)
         run: npm run build
 
-      - name: 📂 Verify dist output
+      - name: 📂 Verify dist Folder
         run: |
-          echo "Dist contents:"
-          ls -la dist || echo "⚠️ dist not found"
+          echo "✅ Checking dist folder..."
+          ls -la dist || echo "⚠️ dist not found!"
 
-      - name: 🚚 Upload dist to EC2
+      - name: 🚚 Upload dist to EC2 using SCP
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -48,4 +48,5 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }}
           script: |
+            echo "🔁 Reloading NGINX..."
             sudo nginx -t && sudo systemctl reload nginx
