@@ -1,0 +1,53 @@
+name: Deploy Sociofy Backend Server - Production
+
+on:
+  push:
+    branches:
+      - server
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🧰 Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'  # Your EC2 has Node 22
+
+      - name: 📦 Install dependencies
+        run: npm install
+
+      - name: 🔨 Build TypeScript
+        run: npm run build
+
+      - name: 🚀 Upload dist + package files to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          source: |
+            dist/
+            package.json
+            package-lock.json
+          target: ~/sociofy/server
+
+      - name: 🔁 Restart PM2 on EC2
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            cd ~/sociofy/server
+            npm install
+            pm2 delete sociofy-server || true
+            pm2 start dist/index.js --name "sociofy-server"
+            pm2 save
