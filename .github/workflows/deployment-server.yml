@@ -40,7 +40,7 @@ jobs:
           source: "dist/*,package.json,package-lock.json"
           target: "~/sociofy/server"
 
-      - name: 🔁 Restart backend on EC2 using PM2
+      - name: 🔁 Restart backend server on EC2 using PM2
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
