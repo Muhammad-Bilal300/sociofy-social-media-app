@@ -14,10 +14,11 @@ jobs:
       - name: ⬇️ Checkout code
         uses: actions/checkout@v4
 
-      - name: 🧰 Set up Node.js
+      - name: 🧰 Set up Node.js 22
         uses: actions/setup-node@v3
         with:
           node-version: '22'
+          cache: 'npm'
 
       - name: 📦 Install dependencies
         run: npm install --force
@@ -27,30 +28,31 @@ jobs:
 
       - name: 📂 Verify dist output
         run: |
-          echo "Contents of dist folder:"
+          echo "📁 Contents of dist folder:"
           ls -la dist || echo "⚠️ dist not found!"
 
-      - name: 🛡️ Write SSH Key to File
+      - name: 🛡️ Setup SSH Key
         run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/id_rsa
-          chmod 600 /tmp/id_rsa
+          echo "🔐 Setting up SSH..."
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} -p ${{ secrets.EC2_SSH_PORT }} >> ~/.ssh/known_hosts
 
-      - name: 🚚 Rsync dist folder to EC2 home
+      - name: 🚚 Deploy dist to EC2 & Reload Nginx
         run: |
-          echo "✅ Sending files to EC2 temporary directory..."
-          rsync -avz -e "ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no -p ${{ secrets.EC2_SSH_PORT }}" dist/ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/${{ secrets.EC2_USER }}/sociofy-dist/
+          echo "📤 Sending dist/ to EC2 ~/client-dist/"
+          rsync -avz --delete -e "ssh -i ~/.ssh/id_rsa -p ${{ secrets.EC2_SSH_PORT }}" \
+            dist/ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/client-dist/
 
-      - name: 🔁 Move dist to nginx + Reload
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USER }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          port: ${{ secrets.EC2_SSH_PORT }}
-          script: |
-            echo "♻️ Removing old files from /usr/share/nginx/html/"
+          echo "⚙️ Deploying to /usr/share/nginx/html and restarting NGINX..."
+          ssh -i ~/.ssh/id_rsa -p ${{ secrets.EC2_SSH_PORT }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            echo "♻️ Cleaning old files..."
             sudo rm -rf /usr/share/nginx/html/*
-            echo "📂 Copying new files from ~/sociofy-dist/"
-            sudo cp -r ~/sociofy-dist/* /usr/share/nginx/html/
+
+            echo "📦 Moving new files to /usr/share/nginx/html/"
+            sudo cp -r ~/client-dist/* /usr/share/nginx/html/
+
             echo "🔁 Reloading NGINX..."
             sudo nginx -t && sudo systemctl reload nginx
+          EOF
