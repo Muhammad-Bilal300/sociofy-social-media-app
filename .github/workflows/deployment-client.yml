@@ -30,24 +30,22 @@ jobs:
           echo "Contents of dist folder:"
           ls -la dist || echo "⚠️ dist not found!"
 
-      - name: 🛡️ Decode SSH Private Key
+      - name: 🛡️ Write SSH Key to File
         run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" | base64 -d > /tmp/id_rsa
+          echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
 
       - name: 🚚 Deploy dist to EC2
         run: |
           echo "✅ Deploying dist folder to EC2..."
-          rsync -avz -e "ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no -p ${{ secrets.EC2_SSH_PORT }}" dist/ ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:/usr/share/nginx/html/
+          rsync -avz -e "ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no -p ${{ secrets.EC2_SSH_PORT }}" dist/ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/usr/share/nginx/html/
 
-      - name: 🔁 Reload NGINX
+      - name: 🔁 Reload NGINX on EC2
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
+          username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: ${{ secrets.EC2_SSH_PORT }}
           script: |
-            echo "${{ secrets.EC2_SSH_KEY }}" | base64 -d > /tmp/id_rsa
-            chmod 600 /tmp/id_rsa
             sudo nginx -t && sudo systemctl reload nginx
