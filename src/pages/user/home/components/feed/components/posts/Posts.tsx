@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import userImage from "../../../../../../../assets/user.png";
 import story1 from "../../../../../../../assets/story-1.jpg";
 import story2 from "../../../../../../../assets/story-2.jpg";
 import story3 from "../../../../../../../assets/story-3.jpg";
 import story4 from "../../../../../../../assets/story-4.jpg";
 import { AiOutlineLike } from "react-icons/ai";
-import { AiFillLike } from "react-icons/ai";
 import { FaRegComment } from "react-icons/fa";
 import { PiShareFatBold } from "react-icons/pi";
 
@@ -176,7 +175,9 @@ const Posts: React.FC = () => {
                   </p>
                 </div>
               </div>
-              <p className="mx-3 mb-2">{post.sharedPostedUser.postDescription}</p>
+              <p className="mx-3 mb-2">
+                {post.sharedPostedUser.postDescription}
+              </p>
               {post.sharedPostedUser.postImage && (
                 <img
                   src={post.sharedPostedUser.postImage}
@@ -198,7 +199,7 @@ const Posts: React.FC = () => {
               {/* Reactions Panel */}
               {hoveredPostIndex === index && (
                 <div
-                  className="absolute bottom-full left-[90%] transform -translate-x-1/2 mb-2 shadow-md shadow-secondary flex bg-white  p-1.5 rounded-full shadow-lg z-10 transition-all duration-350"
+                  className="absolute bottom-full left-[90%] transform -translate-x-1/2 mb-2 shadow-secondary flex bg-white  p-1.5 rounded-full shadow-lg z-10 transition-all duration-350"
                   onMouseEnter={() => handleMouseEnter(index)} // keep open if hovering over panel
                   onMouseLeave={handleMouseLeave}
                 >
