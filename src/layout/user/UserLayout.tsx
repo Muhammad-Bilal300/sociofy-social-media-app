@@ -4,8 +4,10 @@ import Footer from "./components/footer/Footer";
 
 const UserLayout = () => {
   return (
-    <div className="h-[100vh]">
-      <Header />
+    <div>
+      <div className="sticky top-0 z-50">
+        <Header />
+      </div>
       <Body />
       <Footer />
     </div>

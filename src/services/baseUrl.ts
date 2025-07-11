@@ -16,18 +16,16 @@
 
 // export default baseUrl;
 
-
-const node_env = "production";
+const node_env: string = "production";
 
 const isProduction = node_env === "production";
 
 const baseUrl: string = isProduction
-  ? "http://16.24.205.91:8080/api/v1" // Backend on EC2 port 8080
+  ? "https://sociofy.site/api/v1" // Backend on EC2 port 8080
   : "http://localhost:8080/api/v1";
 
 export const imageBaseUrl: string = isProduction
-  ? "http://16.24.205.91:8080"
+  ? "https://sociofy.site"
   : "http://localhost:8080";
 
 export default baseUrl;
-
