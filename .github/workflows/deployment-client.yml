@@ -17,8 +17,8 @@ jobs:
       - name: 🧰 Set up Node.js 22
         uses: actions/setup-node@v3
         with:
-          node-version: "22"
-          cache: "npm"
+          node-version: '22'
+          cache: 'npm'
 
       - name: 📦 Install dependencies
         run: npm install --force
@@ -35,17 +35,22 @@ jobs:
         run: |
           echo "🔐 Setting up SSH..."
           mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} -p ${{ secrets.EC2_SSH_PORT }} >> ~/.ssh/known_hosts
 
       - name: 🚚 Deploy dist to EC2 & Reload Nginx
         run: |
+          echo "📤 Sending dist/ to EC2 ~/client-dist/"
           rsync -avz --delete -e "ssh -i ~/.ssh/id_rsa -p ${{ secrets.EC2_SSH_PORT }}" \
             dist/ ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/client-dist/
 
+          echo "⚙️ Deploying to /usr/share/nginx/html and restarting NGINX..."
           ssh -i ~/.ssh/id_rsa -p ${{ secrets.EC2_SSH_PORT }} ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            echo "♻️ Cleaning old files..."
             sudo rm -rf /usr/share/nginx/html/*
 
+            echo "📦 Moving new files to /usr/share/nginx/html/"
             sudo cp -r ~/client-dist/* /usr/share/nginx/html/
 
             echo "🔁 Reloading NGINX..."
