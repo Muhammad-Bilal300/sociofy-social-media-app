@@ -10,9 +10,7 @@ import PostActionBar from "./components/PostActionBar";
 import PostTextAreaWithEmoji from "./components/PostTextAreaWithEmoji";
 import FeelingPanel from "./components/FeelingPanel";
 import LocationPanel from "./components/LocationPanel";
-
 import { useAddPostMutation } from "./hooks/useAddPostMutation";
-import { AddPostResponse } from "./types/AddPostTypes";
 import AlertDialog from "../../../../../../../../../utilities/Alert";
 import GoogleMapLocation from "./components/GoogleMapLocation";
 
@@ -49,7 +47,7 @@ const AddPostModal: React.FC<AddPostModalProps> = ({ open, onClose }) => {
     };
 
     addPostMutation.mutate(payload, {
-      onSuccess: (data: AddPostResponse) => {
+      onSuccess: () => {
         // AlertDialog({
         //   title: "",
         //   text: data.message,
