@@ -34,6 +34,19 @@ const ERROR_MESSAGES = {
   ENDPOINT_ACCESS_DENIED: (userType: String) => {
     return `Forbidden! only ${userType}s are allowed.`;
   },
+
+  // Post
+  POST_NOT_FOUND: "POST_NOT_FOUND",
+  EMPTY_REQUIRED_FIELDS_IN_POST: "Description Or Files are required in Post.",
+
+  // Comment
+
+  EMPTY_REQUIRED_FIELDS_IN_COMMENT:
+    "Description Or Files are required in Comment.",
+  COMMENT_NOT_FOUND: "COMMENT_NOT_FOUND",
+
+  EMPTY_REQUIRED_FIELDS_IN_REPLY: "Description Or Files are required in Reply.",
+  REPLY_NOT_FOUND: "REPLY_NOT_FOUND",
 };
 
 export { ERROR_MESSAGES };

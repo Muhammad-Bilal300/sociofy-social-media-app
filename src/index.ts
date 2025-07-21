@@ -4,10 +4,26 @@ import dotenv from "dotenv";
 import dbConnect from "./config/dbConnect";
 import mainRouter from "./routes/all-routes";
 import path from "path";
+import redisClient from "./config/redisClient";
+import { rateLimiter } from "./middlewares/rateLimitter";
+import { connectRabbitMQ } from "./config/rabbit-mq";
+import { startPostCreatedConsumer } from "./consumers/post-created-consumer";
+import { initSocket } from "./config/socket";
+import http from "http";
 
 dotenv.config();
 
 const app = express();
+
+const server = http.createServer(app);
+const io = initSocket(server);
+
+io.on("connection", (socket) => {
+  const userId = socket.handshake.query.userId;
+  if (userId) {
+    socket.join(userId); // join room with userId
+  }
+});
 
 app.use(
   cors({
@@ -22,24 +38,36 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/uploads", express.static(path.join(__dirname, "..", "uploads")));
 
 // Mount all API routes
+
+app.use(rateLimiter);
 app.use(mainRouter);
-
-// ✅ Only add this AFTER all other routes
-// app.use(express.static(path.join(__dirname, "..", "..", "client", "build")));
-
-// app.get("*", (req, res) => {
-//   res.sendFile(
-//     path.join(__dirname, "..", "..", "client", "build", "index.html")
-//   );
-// });
 
 const PORT = process.env.PORT;
 
-app.listen(PORT, (err) => {
+server.listen(PORT, async (err?: any) => {
   if (err) {
-    console.log("Server is not connected due to this Error: ", err);
-  } else {
-    console.log("Server is Connected at :", PORT);
-    dbConnect();
+    console.error("Server failed to start:", err);
+    return;
+  }
+
+  console.log("🚀 Server is running on port:", PORT);
+
+  // 1. Connect DB
+  dbConnect();
+
+  // 2. Connect Redis
+  try {
+    await redisClient.connect();
+    console.log("✅ Redis Connected");
+  } catch (redisErr) {
+    console.error("❌ Redis connection failed:", redisErr);
+  }
+
+  // 3. Connect Kafka + Start Consumers
+  try {
+    await connectRabbitMQ();
+    startPostCreatedConsumer();
+  } catch (err: any) {
+    console.error("❌ RabbitMQ connection failed:", err.message);
   }
 });
