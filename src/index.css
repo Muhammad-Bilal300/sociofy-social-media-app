@@ -12,7 +12,7 @@ body {
   --color-gradient3: oklch(93.76% 0.026 321.94);
   --color-primary: oklch(59.09% 0.229 281.25);
   --color-secondary: oklch(0.68 0.0049 214.34);
-  --color-body-background: oklch(96.65% 0.005 258.32);
+  --color-background: oklch(96.65% 0.005 258.32);
   --color-hover-color: oklch(92.8% 0.006 264.531);
 
   /* Font sizes */

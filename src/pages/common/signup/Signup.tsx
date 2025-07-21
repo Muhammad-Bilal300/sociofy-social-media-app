@@ -171,7 +171,12 @@ const Signup = () => {
                 isIcon={false}
                 isIconLeft={true}
                 isIconRight={false}
-                bgColor={`bg-primary`}
+                bgColor={
+                  signupMutation.isPending
+                    ? "bg-primary opacity-50"
+                    : "bg-primary"
+                }
+                disabled={signupMutation.isPending}
                 textColor={`text-white`}
                 buttonText={signupMutation.isPending ? "Loading.." : "Sign up"}
                 height={`h-[40px]`}

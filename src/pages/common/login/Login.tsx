@@ -128,7 +128,12 @@ const Login = () => {
                 isIcon={false}
                 isIconLeft={true}
                 isIconRight={false}
-                bgColor="bg-primary"
+                bgColor={
+                  loginMutation.isPending
+                    ? "bg-primary opacity-50"
+                    : "bg-primary"
+                }
+                disabled={loginMutation.isPending}
                 textColor="text-white"
                 buttonText={loginMutation.isPending ? "Loading.." : "Login"}
                 height="h-[40px]"

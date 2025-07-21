@@ -1,30 +1,36 @@
-import { useEffect } from "react";
-import Routers from "./routers/Routers";
-import { getUserRole } from "./utilities/Globals";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Routers from "./routers/Routers";
+import { getUserRole, getUserToken } from "./utilities/Globals";
 import { ROLES } from "./constants/basic";
 
 const App = () => {
   const navigate = useNavigate();
-  // const [isShowed, setIsShowed] = useState(false);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
+    const token = getUserToken();
     const role = getUserRole();
-    if (role == ROLES.USER) {
+
+    if (token && role === ROLES.USER) {
       navigate("/");
-      // setIsShowed(true);
-    } else if (role == ROLES.ADMIN) {
-      navigate("/admin");
-      // setIsShowed(true);
+    } else if (token && role === ROLES.ADMIN) {
+      navigate("/admin/dashboard");
     } else {
       navigate("/login");
-      // setIsShowed(true);
     }
+
+    setLoading(false);
   }, []);
-  return (
-    <div>
-      <Routers />
-    </div>
-  );
+
+  if (loading)
+    return (
+      <div className="h-screen w-screen flex items-center justify-center bg-white">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent"></div>
+      </div>
+    );
+
+  return <Routers />;
 };
 
 export default App;

@@ -11,3 +11,8 @@ export const CHECK_USER_EMAIL = "/user/check-user-email";
 export const SEND_VERIFICATION_OTP = "/user/send-otp-email";
 export const VERIFY_OTP = "/user/verify-otp";
 export const RESET_PASSWORD = "/user/reset-password";
+
+// Post
+export const ADD_POST = "/post/add-post";
+export const GET_ALL_POSTS = "/post/get-all-posts";
+export const SEARCH_LOCATION = "/post/search-location";

@@ -1,6 +1,5 @@
 import Header from "./components/header/Header";
 import Body from "./components/body/Body";
-import Footer from "./components/footer/Footer";
 
 const UserLayout = () => {
   return (
@@ -9,7 +8,6 @@ const UserLayout = () => {
         <Header />
       </div>
       <Body />
-      <Footer />
     </div>
   );
 };

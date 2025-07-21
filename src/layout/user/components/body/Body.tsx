@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 
 const Body = () => {
   return (
-    <div>
+    <div className="bg-background">
       <Outlet />
     </div>
   );

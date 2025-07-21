@@ -22,7 +22,6 @@ export const useLoginMutation = () => {
       } else if (role == ROLES.ADMIN) {
         navigate("/admin");
       }
-      navigate("/");
       AlertDialog({
         title: "",
         text: data.message,

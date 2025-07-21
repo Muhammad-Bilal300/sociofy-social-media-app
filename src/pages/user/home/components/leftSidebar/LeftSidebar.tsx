@@ -9,14 +9,16 @@ import friendsImage from "../../../../../assets/friends.png";
 import savedImage from "../../../../../assets/bookmarks.png";
 import messengerImage from "../../../../../assets/messenger.png";
 import pagesImage from "../../../../../assets/pages.png";
+import { getUserName } from "../../../../../utilities/Globals";
 
 const LeftSidebar = () => {
-  const [selectedItem, setSelectedItem] = useState("Feed"); // Default selected
+  const [selectedItem, setSelectedItem]: string | any = useState("Feed"); // Default selected
+  const userName = getUserName();
 
   const sidebarmenus = [
     {
       icon: <img src={userImage} alt="userImage" className="h-[32px]" />,
-      content: "Muhammad Bilal",
+      content: userName,
     },
     {
       icon: <img src={feedImage} alt="feedImage" className="h-[32px]" />,
