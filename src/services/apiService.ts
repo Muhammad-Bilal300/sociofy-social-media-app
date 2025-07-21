@@ -2,6 +2,7 @@
 import axios, { AxiosRequestConfig, Method } from "axios";
 import baseUrl from "./baseUrl";
 import AlertDialog from "../utilities/Alert";
+import { NavigateFunction } from "react-router-dom";
 
 const axiosInstance = axios.create({
   baseURL: baseUrl,
@@ -14,7 +15,8 @@ type ApiService = (
   url: string,
   method: Method,
   body?: any,
-  token?: string | null
+  token?: string | null,
+  navigate?: NavigateFunction
 ) => Promise<any>;
 
 // Generic API service function
@@ -22,7 +24,8 @@ export const apiService: ApiService = async (
   url,
   method,
   body = null,
-  token = null
+  token = null,
+  navigate
 ) => {
   let attempt = 0;
   const maxRetries = 1;
@@ -60,6 +63,17 @@ export const apiService: ApiService = async (
             icon: "error",
             timer: 1500,
           });
+          if (
+            error.response.data.message ==
+              "Your token has expired! please login again" ||
+            error.response.statusText ==
+              "Your token has expired! please login again"
+          ) {
+            if (navigate) {
+              navigate("/login");
+            }
+          }
+
           throw new Error(
             error.response.data.message || error.response.statusText
           );
@@ -78,6 +92,12 @@ export const apiService: ApiService = async (
             icon: "error",
             timer: 1500,
           });
+
+          if (error.message == "Your token has expired! please login again") {
+            if (navigate) {
+              navigate("/login");
+            }
+          }
           throw new Error(error.message || "Something went wrong");
         }
       }
