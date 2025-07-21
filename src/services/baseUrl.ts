@@ -1,4 +1,4 @@
-const node_env: string = "production";
+const node_env: string = "development";
 
 const isProduction = node_env === "production";
 
