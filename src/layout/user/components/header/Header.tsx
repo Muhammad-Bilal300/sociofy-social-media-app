@@ -15,7 +15,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [active, setActive] = useState("home");
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const userMenuRef = useRef(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const centerIcons = [
     { id: "home", icon: <FaHouse size={24} /> },
