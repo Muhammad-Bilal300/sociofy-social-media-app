@@ -15,6 +15,8 @@ import { generateOtp } from "../utils/basic";
 import { sendAccountVerificationOtpEmail } from "../utils/email";
 import { UNAUTHORIZE_MESSAGES } from "../constants/unauthorize-messages";
 import { checkUserActivation } from "../utils/check-user-activation";
+import redisClient from "../config/redisClient";
+import { REDIS_KEYS } from "../constants/basic";
 
 const signup = async (req: Request, res: Response): Promise<any> => {
   try {
@@ -165,6 +167,9 @@ const login = async (req: Request, res: Response): Promise<any> => {
       user: user,
       authToken: authToken,
     };
+
+    const CACHE_KEY = `KEY : ${REDIS_KEYS.POSTS_LIST} - USER : ${user?._id}`;
+    await redisClient.del(CACHE_KEY);
 
     return res
       .status(STATUS_CODE.OK)
