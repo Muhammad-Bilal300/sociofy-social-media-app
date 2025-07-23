@@ -15,6 +15,11 @@ import appIcon from "../../../assets/appIcon.png";
 const Signup = () => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState<
+    "weak" | "good" | "strong" | ""
+  >("");
+
   const {
     register,
     handleSubmit,
@@ -22,6 +27,28 @@ const Signup = () => {
   } = useForm<SignupFormData>();
 
   const signupMutation = useSignupMutation();
+
+  const checkPasswordStrength = (
+    value: string
+  ): "weak" | "good" | "strong" | "" => {
+    const hasUpperCase = /[A-Z]/.test(value);
+    const hasLowerCase = /[a-z]/.test(value);
+    const hasNumber = /[0-9]/.test(value);
+    const hasSpecialChar = /[^A-Za-z0-9]/.test(value);
+
+    const checksPassed = [
+      hasUpperCase,
+      hasLowerCase,
+      hasNumber,
+      hasSpecialChar,
+    ].filter(Boolean).length;
+
+    if (value.length === 0) return "";
+    if (checksPassed === 1) return "weak";
+    if (checksPassed >= 2 && checksPassed < 4) return "good";
+    if (checksPassed === 4) return "strong";
+    return "";
+  };
 
   const onSubmit = (data: SignupFormData) => {
     signupMutation.mutate(data);
@@ -31,6 +58,7 @@ const Signup = () => {
     e.preventDefault();
     navigate("/login");
   };
+
   return (
     <div className="min-h-screen w-screen bg-gradient-to-b lg:bg-gradient-to-r from-white via-white to-gradient1 flex flex-col lg:flex-row">
       {/* Left half / Top Half (logo) */}
@@ -44,7 +72,8 @@ const Signup = () => {
           Sociofy
         </h1>
       </div>
-      {/* Empty Right half / Bottom Half */}
+
+      {/* Right half / Bottom Half */}
       <div className="w-full lg:w-1/2 flex flex-col items-center justify-center px-4 mb-10 lg:mb-0">
         <div className="flex flex-col gap-y-2 bg-white p-4 w-full max-w-[400px] rounded-md shadow-primary shadow-2xl">
           <h3 className={`heading flex justify-center text-primary`}>
@@ -68,7 +97,7 @@ const Signup = () => {
                 required: "First Name is required",
               }}
               width={`w-[100%]`}
-              marginBottom={`mb-4`}
+              marginBottom={`mb-3`}
               preIcon={FaUserAlt}
             />
             <InputField
@@ -81,7 +110,7 @@ const Signup = () => {
                 required: "Last Name is required",
               }}
               width={`w-[100%]`}
-              marginBottom={`mb-4`}
+              marginBottom={`mb-3`}
               preIcon={FaUserAlt}
             />
             <InputField
@@ -98,7 +127,7 @@ const Signup = () => {
                 },
               }}
               width={`w-[100%]`}
-              marginBottom={`mb-4`}
+              marginBottom={`mb-3`}
               preIcon={MdEmail}
             />
             <InputField
@@ -115,11 +144,18 @@ const Signup = () => {
                 },
               }}
               width={`w-[100%]`}
-              marginBottom={`mb-4`}
+              marginBottom={`mb-3`}
               icon={isVisible ? AiFillEye : AiFillEyeInvisible}
               isVisible={isVisible}
               setIsVisible={setIsVisible}
               preIcon={RiLockPasswordFill}
+              onChange={(e) => {
+                const value = e.target.value;
+                setPassword(value);
+                setPasswordStrength(checkPasswordStrength(value));
+              }}
+              value={password}
+              passwordStrength={passwordStrength}
             />
 
             <div className="mb-1">

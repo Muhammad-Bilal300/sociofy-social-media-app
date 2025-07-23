@@ -2,7 +2,7 @@ import React from "react";
 import { FieldErrors, UseFormRegister } from "react-hook-form";
 
 interface InputFieldProps {
-  register: UseFormRegister<any>; // You can replace `any` with a specific form schema type
+  register: UseFormRegister<any>;
   name: string;
   placeholder: string;
   type: string;
@@ -10,13 +10,14 @@ interface InputFieldProps {
   validationRules?: Record<string, any>;
   width?: string;
   marginBottom?: string;
-  icon?: React.ElementType; // Icon component
+  icon?: React.ElementType;
   isVisible?: boolean;
   setIsVisible?: React.Dispatch<React.SetStateAction<boolean>>;
   disabled?: boolean;
   onChange?: React.ChangeEventHandler<HTMLInputElement>;
   value?: string | number | readonly string[] | undefined | null;
-  preIcon?: React.ElementType; // Icon component
+  preIcon?: React.ElementType;
+  passwordStrength?: "weak" | "good" | "strong" | "";
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -35,15 +36,32 @@ const InputField: React.FC<InputFieldProps> = ({
   onChange = () => {},
   value = undefined,
   preIcon: PreIcon,
+  passwordStrength = "",
 }) => {
   const toggleVisibility = () => {
     setIsVisible?.(!isVisible);
   };
 
+  let borderColor = "border-secondary";
+
+  if (type === "password" && value) {
+    if (passwordStrength === "weak") borderColor = "border-red-500";
+    else if (passwordStrength === "good") borderColor = "border-orange-400";
+    else if (passwordStrength === "strong") borderColor = "border-green-500";
+  }
+
+  if (type === "text" && value && passwordStrength !== "") {
+    if (passwordStrength === "weak") borderColor = "border-red-500";
+    else if (passwordStrength === "good") borderColor = "border-orange-400";
+    else if (passwordStrength === "strong") borderColor = "border-green-500";
+  }
+
   return (
     <div className={marginBottom}>
       <div
-        className={`h-[38px] border-[1px] border-secondary rounded-md ${width} px-2 flex items-center ${
+        className={`h-[38px] ${
+          borderColor !== "border-secondary" ? "border-[2px]" : "border-[1px]"
+        } ${borderColor} rounded-md ${width} px-2 flex items-center ${
           disabled ? "bg-[#f2f2f2]" : "bg-transparent"
         }`}
       >
@@ -79,6 +97,22 @@ const InputField: React.FC<InputFieldProps> = ({
           {(errors[name] as any)?.message}
         </span>
       )}
+
+      {(type === "password" || type === "text") &&
+        (passwordStrength || passwordStrength !== "") && (
+          <span
+            className={` ${
+              passwordStrength === "weak"
+                ? "text-red-500"
+                : passwordStrength === "good"
+                ? "text-orange-400"
+                : "text-green-600"
+            }`}
+          >
+            <span>Password strength : </span>
+            <span className="font-semibold">{passwordStrength}</span>
+          </span>
+        )}
     </div>
   );
 };

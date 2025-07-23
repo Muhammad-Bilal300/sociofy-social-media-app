@@ -93,6 +93,10 @@ const Posts: React.FC = () => {
           <PostShimmer isShared={true} />
           <PostShimmer isShared={false} />
         </>
+      ) : data?.data?.length === 0 ? (
+        <div className="bg-white w-full flex justify-center items-center p-10 rounded-xl shadow-md text-gray-600 text-lg font-semibold">
+          No Posts yet
+        </div>
       ) : (
         data?.data?.map((post: Post, index: number) => (
           <div

@@ -5,6 +5,7 @@ let socket: Socket;
 
 export const connectSocket = (userId: string) => {
   if (!socket) {
+    // socket = io("http://localhost:8080", {
     socket = io("https://sociofy.site", {
       query: { userId }, // send userId so server can join room
       transports: ["websocket"],
