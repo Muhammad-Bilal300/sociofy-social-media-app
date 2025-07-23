@@ -63,10 +63,10 @@ server.listen(PORT, async (err?: any) => {
     console.error("❌ Redis connection failed:", redisErr);
   }
 
-  // 3. Connect Kafka + Start Consumers
+  // 3. Connect RabbitMQ + Start Consumers
   try {
     await connectRabbitMQ();
-    startPostCreatedConsumer();
+    await startPostCreatedConsumer();
   } catch (err: any) {
     console.error("❌ RabbitMQ connection failed:", err.message);
   }

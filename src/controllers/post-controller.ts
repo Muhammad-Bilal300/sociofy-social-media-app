@@ -84,6 +84,7 @@ const addPost = async (req: Request, res: Response): Promise<any> => {
     const savedPost = await post.save();
 
     const channel = getChannel();
+
     if (channel) {
       const msg = JSON.stringify({
         userId,
@@ -104,115 +105,6 @@ const addPost = async (req: Request, res: Response): Promise<any> => {
           STATUS_CODE.CREATED,
           SUCCESS_MESSAGES.CREATED,
           savedPost
-        )
-      );
-  } catch (error) {
-    return res
-      .status(STATUS_CODE.SERVER_ERROR)
-      .json(
-        ServerErrorResponse.customErrorWithStackTrace(
-          STATUS_CODE.SERVER_ERROR,
-          STATUS_MESSAGES.SERVER_ERROR,
-          error
-        )
-      );
-  }
-};
-
-const editPost = async (req: Request, res: Response): Promise<any> => {
-  try {
-    const { description, previousFiles, postStatus } = req.body;
-    const { id } = req.params;
-    const currentUser = req.user;
-    const userId = currentUser?._id;
-
-    const post = await Post.findById(id);
-    if (!post) {
-      return res
-        .status(STATUS_CODE.NOT_FOUND)
-        .json(ServerErrorResponse.notFound(ERROR_MESSAGES.POST_NOT_FOUND));
-    }
-
-    const previousFilesArray =
-      previousFiles && JSON.parse(previousFiles).length > 0
-        ? JSON.parse(previousFiles)
-        : [];
-
-    const files = req.files as
-      | Express.Multer.File[]
-      | { [fieldname: string]: Express.Multer.File[] }
-      | undefined;
-
-    // Process the images
-    if (
-      previousFilesArray.length == 0 &&
-      (!files || files.length == 0) &&
-      (!description || description == "")
-    ) {
-      return res
-        .status(STATUS_CODE.BAD_REQUEST)
-        .json(
-          ServerErrorResponse.customError(
-            STATUS_MESSAGES.FAILED,
-            STATUS_CODE.BAD_REQUEST,
-            ERROR_MESSAGES.EMPTY_REQUIRED_FIELDS_IN_POST,
-            null
-          )
-        );
-    }
-
-    let filesArray: { url: string; format: string }[] = [];
-
-    if (Array.isArray(files)) {
-      filesArray = files.map((file) => ({
-        url: `/uploads/files/${file.filename}`,
-        format: getFileFormat(file.originalname),
-      }));
-    } else if (files && typeof files === "object") {
-      // If it's a dictionary (e.g., from `upload.fields()`), flatten all file arrays
-      for (const fieldName in files) {
-        filesArray.push(
-          ...files[fieldName].map((file) => ({
-            url: `/uploads/files/${file.filename}`,
-            format: getFileFormat(file.originalname),
-          }))
-        );
-      }
-    }
-
-    // Update product details
-    const updatedPost = await Post.findByIdAndUpdate(
-      id,
-      {
-        description,
-        postStatus,
-        files: [...previousFilesArray, ...filesArray],
-        isEdited: true,
-      },
-      { new: true } // To return the updated document
-    );
-
-    const channel = getChannel();
-    if (channel) {
-      const msg = JSON.stringify({
-        userId,
-        postId: id,
-      });
-
-      await channel.assertQueue("post_edited");
-      channel.sendToQueue("post_edited", Buffer.from(msg));
-    }
-
-    // Return success response
-    return res
-      .status(STATUS_CODE.OK)
-      .json(
-        ServerSuccessResponse.successResponse(
-          true,
-          STATUS_MESSAGES.SUCCESS,
-          STATUS_CODE.OK,
-          SUCCESS_MESSAGES.UPDATE,
-          updatedPost
         )
       );
   } catch (error) {

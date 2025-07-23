@@ -7,9 +7,9 @@ export const initSocket = (server: any) => {
   io = new Server(server, {
     cors: {
       // origin: "*", // adjust this for your frontend
-
-      origin: "https://sociofy.site", // or "*" during development
+      origin: "https://sociofy.site",
       methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+      credentials: true,
     },
   });
   return io;
