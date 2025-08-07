@@ -2,19 +2,15 @@ import { Request, Response } from "express";
 import { STATUS_CODE } from "../constants/status-codes";
 import ServerErrorResponse from "../utils/classes/server-error-response";
 import { STATUS_MESSAGES } from "../constants/status-messages";
-import User, { UserTypes } from "../models/user-model";
+import { UserTypes } from "../models/user-model";
 import { ERROR_MESSAGES } from "../constants/error-messages";
 import Post from "../models/post-model";
 import ServerSuccessResponse from "../utils/classes/server-success-response";
 import { SUCCESS_MESSAGES } from "../constants/success-messages";
 import { getFileFormat } from "../utils/basic";
-import Comment from "../models/comment-model";
-import Reply from "../models/reply-model";
 import { REDIS_KEYS } from "../constants/basic";
-import redisClient from "../config/redisClient";
+import redisClient from "../config/redis-client";
 import { getChannel } from "../config/rabbit-mq";
-import { missingFieldError } from "../utils/missing-field-error";
-import { getSocket } from "../config/socket";
 
 declare global {
   namespace Express {
@@ -237,4 +233,98 @@ const searchPostLocation = async (
   }
 };
 
-export { addPost, getAllPosts, searchPostLocation };
+const getSinglePost = async (req: Request, res: Response): Promise<any> => {
+  try {
+    const { id } = req.params;
+
+    const post = await Post.findById(id);
+    if (post) {
+      return res
+        .status(STATUS_CODE.NOT_FOUND)
+        .json(ServerErrorResponse.notFound(ERROR_MESSAGES.POST_NOT_FOUND));
+    }
+
+    return res
+      .status(STATUS_CODE.OK)
+      .json(
+        ServerSuccessResponse.successResponse(
+          true,
+          STATUS_MESSAGES.SUCCESS,
+          STATUS_CODE.OK,
+          SUCCESS_MESSAGES.OPERATION_SUCCESSFULL,
+          post
+        )
+      );
+  } catch (error) {
+    return res
+      .status(STATUS_CODE.SERVER_ERROR)
+      .json(
+        ServerErrorResponse.customErrorWithStackTrace(
+          STATUS_CODE.SERVER_ERROR,
+          STATUS_MESSAGES.SERVER_ERROR,
+          error
+        )
+      );
+  }
+};
+
+const reactOrDisreactPost = async (
+  req: Request,
+  res: Response
+): Promise<any> => {
+  try {
+    const currentUser = req.user;
+    const userId = currentUser?._id;
+
+    const { id } = req.params;
+
+    const post = await Post.findById(id);
+    if (post) {
+      return res
+        .status(STATUS_CODE.NOT_FOUND)
+        .json(ServerErrorResponse.notFound(ERROR_MESSAGES.POST_NOT_FOUND));
+    }
+
+    const channel = getChannel();
+
+    if (channel) {
+      const msg = JSON.stringify({
+        userId,
+        postId: id,
+      });
+
+      await channel.assertQueue("post_reacted");
+      channel.sendToQueue("post_reacted", Buffer.from(msg));
+    }
+
+    return res
+      .status(STATUS_CODE.OK)
+      .json(
+        ServerSuccessResponse.successResponse(
+          true,
+          STATUS_MESSAGES.SUCCESS,
+          STATUS_CODE.OK,
+          SUCCESS_MESSAGES.OPERATION_SUCCESSFULL,
+          null
+        )
+      );
+  } catch (error) {
+    return res
+      .status(STATUS_CODE.SERVER_ERROR)
+      .json(
+        ServerErrorResponse.customErrorWithStackTrace(
+          STATUS_CODE.SERVER_ERROR,
+          STATUS_MESSAGES.SERVER_ERROR,
+          error
+        )
+      );
+  }
+};
+
+export {
+  addPost,
+  getAllPosts,
+  searchPostLocation,
+  getSinglePost,
+  reactOrDisreactPost,
+};

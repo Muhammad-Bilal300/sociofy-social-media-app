@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import redisClient from "../config/redisClient";
+import redisClient from "../config/redis-client";
 import { saveRateLimitLog } from "../utils/redis/rate-limit-service";
 import ServerErrorResponse from "../utils/classes/server-error-response";
 import { STATUS_MESSAGES } from "../constants/status-messages";

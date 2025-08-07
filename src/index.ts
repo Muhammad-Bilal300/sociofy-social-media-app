@@ -1,10 +1,10 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import dbConnect from "./config/dbConnect";
+import dbConnect from "./config/db-connect";
 import mainRouter from "./routes/all-routes";
 import path from "path";
-import redisClient from "./config/redisClient";
+import redisClient from "./config/redis-client";
 import { rateLimiter } from "./middlewares/rateLimitter";
 import { connectRabbitMQ } from "./config/rabbit-mq";
 import { startPostCreatedConsumer } from "./consumers/post-created-consumer";

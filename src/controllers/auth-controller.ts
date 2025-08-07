@@ -15,25 +15,34 @@ import { generateOtp } from "../utils/basic";
 import { sendAccountVerificationOtpEmail } from "../utils/email";
 import { UNAUTHORIZE_MESSAGES } from "../constants/unauthorize-messages";
 import { checkUserActivation } from "../utils/check-user-activation";
-import redisClient from "../config/redisClient";
+import redisClient from "../config/redis-client";
 import { REDIS_KEYS } from "../constants/basic";
+import { typeMismatchError } from "../utils/type-mismatch-error";
 
 const signup = async (req: Request, res: Response): Promise<any> => {
   try {
     const { firstName, lastName, emailAddress, password, gender } = req.body;
 
-    const missingFields = missingFieldError(
-      ["firstName", "lastName", "emailAddress", "password", "gender"],
-      req.body
-    );
-    if (missingFields.length > 0) {
+    const requiredFields = [
+      { field: "firstName", type: "string" as const },
+      { field: "lastName", type: "string" as const },
+      { field: "emailAddress", type: "string" as const },
+      { field: "password", type: "string" as const },
+      { field: "gender", type: "string" as const },
+    ];
+
+    const missingError = missingFieldError(requiredFields, req.body);
+    if (missingError) {
       return res
         .status(STATUS_CODE.BAD_REQUEST)
-        .json(
-          ServerErrorResponse.badRequest(
-            `${missingFields.join(", ")} is required`
-          )
-        );
+        .json(ServerErrorResponse.badRequest(missingError));
+    }
+
+    const typeError = typeMismatchError(requiredFields, req.body);
+    if (typeError) {
+      return res
+        .status(STATUS_CODE.BAD_REQUEST)
+        .json(ServerErrorResponse.badRequest(typeError));
     }
 
     const userExists = await User.findOne({ emailAddress: emailAddress });
@@ -93,18 +102,23 @@ const login = async (req: Request, res: Response): Promise<any> => {
   try {
     const { emailAddress, password } = req.body;
 
-    const missingFields = missingFieldError(
-      ["emailAddress", "password"],
-      req.body
-    );
-    if (missingFields.length > 0) {
+    const requiredFields = [
+      { field: "emailAddress", type: "string" as const },
+      { field: "password", type: "string" as const },
+    ];
+
+    const missingError = missingFieldError(requiredFields, req.body);
+    if (missingError) {
       return res
         .status(STATUS_CODE.BAD_REQUEST)
-        .json(
-          ServerErrorResponse.badRequest(
-            `${missingFields.join(", ")} is required`
-          )
-        );
+        .json(ServerErrorResponse.badRequest(missingError));
+    }
+
+    const typeError = typeMismatchError(requiredFields, req.body);
+    if (typeError) {
+      return res
+        .status(STATUS_CODE.BAD_REQUEST)
+        .json(ServerErrorResponse.badRequest(typeError));
     }
 
     const isValidEmail = regex.email.test(emailAddress);
@@ -202,18 +216,23 @@ const sendAccountVerficationOtp = async (
   try {
     var { emailAddress, userId } = req.body;
 
-    const missingFields = missingFieldError(
-      ["emailAddress", "userId"],
-      req.body
-    );
-    if (missingFields.length > 0) {
+    const requiredFields = [
+      { field: "emailAddress", type: "string" as const },
+      { field: "userId", type: "string" as const },
+    ];
+
+    const missingError = missingFieldError(requiredFields, req.body);
+    if (missingError) {
       return res
         .status(STATUS_CODE.BAD_REQUEST)
-        .json(
-          ServerErrorResponse.badRequest(
-            `${missingFields.join(", ")} is required`
-          )
-        );
+        .json(ServerErrorResponse.badRequest(missingError));
+    }
+
+    const typeError = typeMismatchError(requiredFields, req.body);
+    if (typeError) {
+      return res
+        .status(STATUS_CODE.BAD_REQUEST)
+        .json(ServerErrorResponse.badRequest(typeError));
     } else {
       var isValidEmail = regex.email.test(emailAddress);
 
@@ -348,18 +367,23 @@ const verifyAccountVerficationOtp = async (
   try {
     const { emailAddress, otpCode } = req.body;
 
-    const missingFields = missingFieldError(
-      ["emailAddress", "otpCode"],
-      req.body
-    );
-    if (missingFields.length > 0) {
+    const requiredFields = [
+      { field: "emailAddress", type: "string" as const },
+      { field: "otpCode", type: "number" as const },
+    ];
+
+    const missingError = missingFieldError(requiredFields, req.body);
+    if (missingError) {
       return res
         .status(STATUS_CODE.BAD_REQUEST)
-        .json(
-          ServerErrorResponse.badRequest(
-            `${missingFields.join(", ")} is required`
-          )
-        );
+        .json(ServerErrorResponse.badRequest(missingError));
+    }
+
+    const typeError = typeMismatchError(requiredFields, req.body);
+    if (typeError) {
+      return res
+        .status(STATUS_CODE.BAD_REQUEST)
+        .json(ServerErrorResponse.badRequest(typeError));
     }
 
     var isValidEmail = regex.email.test(emailAddress);

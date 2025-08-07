@@ -1,4 +1,4 @@
-import redisClient from "../config/redisClient";
+import redisClient from "../config/redis-client";
 import { getChannel } from "../config/rabbit-mq";
 import { REDIS_KEYS } from "../constants/basic";
 import User from "../models/user-model";

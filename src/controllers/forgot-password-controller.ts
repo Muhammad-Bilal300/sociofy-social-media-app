@@ -13,20 +13,26 @@ import bcrypt from "bcrypt";
 import User from "../models/user-model";
 import Otp from "../models/otp-model";
 import { missingFieldError } from "../utils/missing-field-error";
+import { typeMismatchError } from "../utils/type-mismatch-error";
 
 const checkUserEmail = async (req: Request, res: Response): Promise<any> => {
   try {
     const { emailAddress } = req.body;
 
-    const missingFields = missingFieldError(["emailAddress"], req.body);
-    if (missingFields.length > 0) {
+    const requiredFields = [{ field: "emailAddress", type: "string" as const }];
+
+    const missingError = missingFieldError(requiredFields, req.body);
+    if (missingError) {
       return res
         .status(STATUS_CODE.BAD_REQUEST)
-        .json(
-          ServerErrorResponse.badRequest(
-            `${missingFields.join(", ")} is required`
-          )
-        );
+        .json(ServerErrorResponse.badRequest(missingError));
+    }
+
+    const typeError = typeMismatchError(requiredFields, req.body);
+    if (typeError) {
+      return res
+        .status(STATUS_CODE.BAD_REQUEST)
+        .json(ServerErrorResponse.badRequest(typeError));
     } else {
       var isValidEmail = regex.email.test(emailAddress);
 
@@ -82,18 +88,23 @@ const sendForgotPasswordOtp = async (
   try {
     var { emailAddress, userId } = req.body;
 
-    const missingFields = missingFieldError(
-      ["emailAddress", "userId"],
-      req.body
-    );
-    if (missingFields.length > 0) {
+    const requiredFields = [
+      { field: "emailAddress", type: "string" as const },
+      { field: "userId", type: "string" as const },
+    ];
+
+    const missingError = missingFieldError(requiredFields, req.body);
+    if (missingError) {
       return res
         .status(STATUS_CODE.BAD_REQUEST)
-        .json(
-          ServerErrorResponse.badRequest(
-            `${missingFields.join(", ")} is required`
-          )
-        );
+        .json(ServerErrorResponse.badRequest(missingError));
+    }
+
+    const typeError = typeMismatchError(requiredFields, req.body);
+    if (typeError) {
+      return res
+        .status(STATUS_CODE.BAD_REQUEST)
+        .json(ServerErrorResponse.badRequest(typeError));
     } else {
       var isValidEmail = regex.email.test(emailAddress);
 
@@ -230,18 +241,23 @@ const verifyForgotPasswordOtp = async (
   try {
     const { emailAddress, otpCode } = req.body;
 
-    const missingFields = missingFieldError(
-      ["emailAddress", "otpCode"],
-      req.body
-    );
-    if (missingFields.length > 0) {
+    const requiredFields = [
+      { field: "emailAddress", type: "string" as const },
+      { field: "otpCode", type: "number" as const },
+    ];
+
+    const missingError = missingFieldError(requiredFields, req.body);
+    if (missingError) {
       return res
         .status(STATUS_CODE.BAD_REQUEST)
-        .json(
-          ServerErrorResponse.badRequest(
-            `${missingFields.join(", ")} is required`
-          )
-        );
+        .json(ServerErrorResponse.badRequest(missingError));
+    }
+
+    const typeError = typeMismatchError(requiredFields, req.body);
+    if (typeError) {
+      return res
+        .status(STATUS_CODE.BAD_REQUEST)
+        .json(ServerErrorResponse.badRequest(typeError));
     }
 
     var isValidEmail = regex.email.test(emailAddress);
@@ -315,21 +331,26 @@ const verifyForgotPasswordOtp = async (
 
 const resetPassword = async (req: Request, res: Response): Promise<any> => {
   try {
-    const missingFields = missingFieldError(
-      ["userId", "newPassword", "confirmNewPassword"],
-      req.body
-    );
-    if (missingFields.length > 0) {
+    var { userId, newPassword, confirmNewPassword } = req.body;
+    const requiredFields = [
+      { field: "userId", type: "string" as const },
+      { field: "newPassword", type: "string" as const },
+      { field: "confirmNewPassword", type: "string" as const },
+    ];
+
+    const missingError = missingFieldError(requiredFields, req.body);
+    if (missingError) {
       return res
         .status(STATUS_CODE.BAD_REQUEST)
-        .json(
-          ServerErrorResponse.badRequest(
-            `${missingFields.join(", ")} is required`
-          )
-        );
+        .json(ServerErrorResponse.badRequest(missingError));
     }
 
-    var { userId, newPassword, confirmNewPassword } = req.body;
+    const typeError = typeMismatchError(requiredFields, req.body);
+    if (typeError) {
+      return res
+        .status(STATUS_CODE.BAD_REQUEST)
+        .json(ServerErrorResponse.badRequest(typeError));
+    }
 
     if (newPassword !== confirmNewPassword) {
       return res

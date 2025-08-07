@@ -1,4 +1,4 @@
-import redisClient from "../../config/redisClient";
+import redisClient from "../../config/redis-client";
 
 // Set key with value
 export const setKey = async (key: string, value: string) => {
@@ -6,7 +6,11 @@ export const setKey = async (key: string, value: string) => {
 };
 
 // Set key with expiry (in seconds)
-export const setWithExpiry = async (key: string, value: string, ttl: number) => {
+export const setWithExpiry = async (
+  key: string,
+  value: string,
+  ttl: number
+) => {
   await redisClient.setEx(key, ttl, value);
 };
 
