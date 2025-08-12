@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const dbConnect = () => {
   try {
-    const mongoUri = process.env.DATABASE_URL_DEVELOPMENT;
+    const mongoUri = process.env.DATABASE_URL_PRODUCTION;
 
     if (!mongoUri) {
       throw new Error(

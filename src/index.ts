@@ -10,6 +10,10 @@ import { connectRabbitMQ } from "./config/rabbit-mq";
 import { startPostCreatedConsumer } from "./consumers/post-created-consumer";
 import { initSocket } from "./config/socket";
 import http from "http";
+import { startPostReactedConsumer } from "./consumers/post-reacted-consumer";
+import { startPostBookmarkedConsumer } from "./consumers/post-bookmarked-consumer";
+import { startPostReportedConsumer } from "./consumers/post-reported-consumer";
+import { startPostDeletedConsumer } from "./consumers/post-deleted-consumer";
 
 dotenv.config();
 
@@ -67,6 +71,10 @@ server.listen(PORT, async (err?: any) => {
   try {
     await connectRabbitMQ();
     await startPostCreatedConsumer();
+    await startPostReactedConsumer();
+    await startPostBookmarkedConsumer();
+    await startPostReportedConsumer();
+    await startPostDeletedConsumer();
   } catch (err: any) {
     console.error("❌ RabbitMQ connection failed:", err.message);
   }

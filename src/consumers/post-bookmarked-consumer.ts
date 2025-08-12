@@ -1,29 +1,29 @@
 import { getChannel } from "../config/rabbit-mq";
 import Post from "../models/post-model";
 
-export async function startPostReactedConsumer() {
+export async function startPostBookmarkedConsumer() {
   const channel = getChannel();
   if (!channel) {
     console.error("❌ RabbitMQ channel not initialized");
     return;
   }
 
-  await channel.assertQueue("post_reacted");
+  await channel.assertQueue("post_bookmarked");
 
-  channel.consume("post_reacted", async (msg) => {
+  channel.consume("post_bookmarked", async (msg) => {
     if (msg) {
       try {
-        const { userId, postId, isReacted, type } = JSON.parse(
+        const { userId, postId, isBookmarked } = JSON.parse(
           msg.content.toString()
         );
 
-        if (isReacted) {
+        if (isBookmarked) {
           // ✅ Add reaction + increment count
           await Post.findByIdAndUpdate(
             postId,
             {
-              $inc: { noOfReacts: 1 },
-              $addToSet: { reactedUsers: { user: userId, type } },
+              $inc: { noOfBookmarks: 1 },
+              $addToSet: { bookmarkedUsers: userId },
             },
             { new: true }
           );
@@ -32,16 +32,16 @@ export async function startPostReactedConsumer() {
           await Post.findByIdAndUpdate(
             postId,
             {
-              $inc: { noOfReacts: -1 },
-              $pull: { reactedUsers: { user: userId, type } },
+              $inc: { noOfBookmarks: -1 },
+              $pull: { bookmarkedUsers: userId },
             },
             { new: true }
           );
 
           // Safety: prevent negative counts
           await Post.updateOne(
-            { _id: postId, noOfReacts: { $lt: 0 } },
-            { $set: { noOfReacts: 0 } }
+            { _id: postId, noOfBookmarks: { $lt: 0 } },
+            { $set: { noOfBookmarks: 0 } }
           );
         }
 

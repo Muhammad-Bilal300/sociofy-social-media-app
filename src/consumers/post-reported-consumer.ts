@@ -1,29 +1,29 @@
 import { getChannel } from "../config/rabbit-mq";
 import Post from "../models/post-model";
 
-export async function startPostReactedConsumer() {
+export async function startPostReportedConsumer() {
   const channel = getChannel();
   if (!channel) {
     console.error("❌ RabbitMQ channel not initialized");
     return;
   }
 
-  await channel.assertQueue("post_reacted");
+  await channel.assertQueue("post_reported");
 
-  channel.consume("post_reacted", async (msg) => {
+  channel.consume("post_reported", async (msg) => {
     if (msg) {
       try {
-        const { userId, postId, isReacted, type } = JSON.parse(
+        const { userId, postId, isReported } = JSON.parse(
           msg.content.toString()
         );
 
-        if (isReacted) {
+        if (isReported) {
           // ✅ Add reaction + increment count
           await Post.findByIdAndUpdate(
             postId,
             {
-              $inc: { noOfReacts: 1 },
-              $addToSet: { reactedUsers: { user: userId, type } },
+              $inc: { noOfReports: 1 },
+              $addToSet: { reportedUsers: userId },
             },
             { new: true }
           );
@@ -32,16 +32,16 @@ export async function startPostReactedConsumer() {
           await Post.findByIdAndUpdate(
             postId,
             {
-              $inc: { noOfReacts: -1 },
-              $pull: { reactedUsers: { user: userId, type } },
+              $inc: { noOfReports: -1 },
+              $pull: { reportedUsers: userId },
             },
             { new: true }
           );
 
           // Safety: prevent negative counts
           await Post.updateOne(
-            { _id: postId, noOfReacts: { $lt: 0 } },
-            { $set: { noOfReacts: 0 } }
+            { _id: postId, noOfReports: { $lt: 0 } },
+            { $set: { noOfReports: 0 } }
           );
         }
 
